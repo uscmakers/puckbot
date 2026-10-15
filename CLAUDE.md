@@ -2,23 +2,34 @@
 
 ## Code (current)
 
-- ONE entry script: `src/puckbot/vision/analyze_image.py` (`puckbot-analyze photo --out outputs/`):
-  photo -> blue surface corners -> calibration -> puck + mallets -> positions in inches, plus a list
-  of what is missing. The user wants one clear script, not many CLIs; keep it that way.
-- `puck_detector.py`: generic round-blob finder (`PuckDetector`), used for both puck and mallets with
-  different configs. Filters: table-surface colour (convex hull), `min_fill` (rejects rings), expected
-  radius, circularity, area.
-- All settings in `configs/our_table.json` (table dims, surface colour, puck + mallet detector settings).
+Everything vision-related lives in `src/puckbot/vision/` (code, settings, data, tests). Keep it there.
+One job per file, in pipeline order:
+
+- `settings.py`: dataclasses saying what each setting means; values in `configs/our_table.json`.
+  `load_settings()` rejects typo'd keys.
+- `table_calibration.py`: `TableCalibration.from_photo()` finds the blue surface's corners ->
+  homography. Units are inches. `to_table(u, v)`, `to_pixel(x, y)`, `top_down(image)`.
+- `puck_mallet_detector.py`: `PuckMalletDetector.find(image, table_outline)` finds all white shapes
+  once, sorts each into puck / mallet / rejected (with reason). Pixels only.
+- `pipeline.py`: `analyze(image, settings) -> Analysis` (table, puck, mallets in inches, problems).
+- `drawing.py`: result picture, top-down view, and `draw_steps` = ONE grid of every step
+  (user does not want separate step images).
+- `cli.py`: `puckbot-analyze photo [--out x.png] [--steps y.png]`. The one command; keep it one.
+- `tests/`: made-up photos (conftest.py) + whole pipeline on `data/samples/`.
+
+Style the user asked for: clear names (no vague ones like "blob"), file docstrings that open with
+a short numbered "Steps" list + usage, short sentences, sections marked `# ── Name ──`, detail
+only where it's needed. Skimmable first, detailed second.
+
+Facts:
 - Our table: white/cream puck and mallets on blue; lines, logo and rails are also white.
   Outer table 50 x 90 in, aluminium rail 3.75 in wide -> playing surface 42.5 x 82.5 in (derived,
   not yet measured with a tape). Centre line lands at ~42.7 in instead of 41.25 -> expect ~1-2 in error
-  from an angled photo (camera sees the inner rail walls).
-- Calibration: `calibration.py` fits the 4 blue-surface edges -> homography. Black corner caps were
-  tried twice and dropped: in the sample photo one cap is out of frame, two merge with the dark
-  shadow between table and wall, one is washed out by glare. AprilTags not wanted for now.
-- Tests: `pytest` (synthetic images + end-to-end on data/samples). Keep data/ and outputs/ out of git.
-- Scope right now: single images only. Video/live-camera sources come later; keep them behind one
-  frame-source interface so the detector never cares where frames come from.
+  from an angled photo (camera sees the inner rail walls). Puck measures ~3.6 in (real: measure it).
+- Black corner caps were tried twice and dropped: in the sample photo one cap is out of frame, two
+  merge with the dark shadow between table and wall, one is washed out by glare. No AprilTags for now.
+- Scope right now: single images only. Live camera comes later; keep it behind one frame-source
+  interface so the detector never cares where frames come from.
 
 Student club project: a robot that plays air hockey on our own full-size table (~4 ft wide).
 Budget: $500 total, ~$300 left at time of writing. Low-cost, DIY, club-friendly choices win.

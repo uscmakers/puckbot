@@ -17,10 +17,22 @@ dependencies = [
 dev = ["pytest>=7"]
 
 [project.scripts]
-puckbot-analyze = "puckbot.vision.analyze_image:main"
+puckbot-analyze = "puckbot.vision.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["src/puckbot/vision/tests"]
+
+[tool.setuptools.package-data]
+"puckbot.vision" = ["configs/*.json"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.format]
+exclude = ["*.md"]

@@ -2,13 +2,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
-venv/
 .pytest_cache/
 .DS_Store
-
-# Large / generated data stays out of git
-data/*
-!data/samples/
 outputs/
 *.mov
 *.MOV

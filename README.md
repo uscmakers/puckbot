@@ -16,31 +16,26 @@ pytest
 ## Analyse a photo of the table
 
 ```bash
-puckbot-analyze data/samples/sample_hockey_table_top_view.png --out outputs/
+puckbot-analyze src/puckbot/vision/data/samples/sample_hockey_table_top_view.png
 ```
 
 ```
   table   : found, playing surface 42.5 x 82.5 in
   puck    : pixel (555, 846) -> x=23.5 in, y=49.3 in, ~3.6 in across
-  mallet 1: pixel (292, 1420) -> x=6.2 in, y=80.6 in, ~4.9 in across
+  mallet 1: pixel (292, 1418) -> x=6.2 in, y=80.5 in, ~4.3 in across
   all good
 ```
 
-It finds the blue playing surface (→ pixel-to-inch mapping), the puck and the mallets on the table,
-and prints positions in inches. If something is missing it says what and how to fix it. `--out`
-saves the photo with everything drawn on it next to a straightened top-down view.
+If something is missing, it says what and how to fix it.
 
-Origin = the playing-surface corner at the top-left of the photo; x runs across the table, y along it.
-All settings (table size, colours, puck/mallet sizes in pixels) are in `configs/our_table.json`.
+| Option | Saves |
+| --- | --- |
+| `--out result.png` | the photo with everything drawn on it + a top-down view |
+| `--steps steps.png` | one picture showing every pipeline step, in order |
 
-## Layout
+Positions: origin = surface corner at the top-left of the photo; x across the table, y along it.
 
-```
-src/puckbot/vision/
-  analyze_image.py   the script: photo -> table, puck, mallets (puckbot-analyze)
-  puck_detector.py   finds round blobs of a colour (used for both puck and mallets)
-  calibration.py     pixels <-> table mm from the 4 corners of the blue surface
-configs/our_table.json
-data/samples/        reference photo (tracked); everything else in data/ is git-ignored
-tests/
-```
+## Code
+
+Vision code (finding the puck, mallets and table) is in `src/puckbot/vision/`.
+Start with its [README](src/puckbot/vision/README.md).

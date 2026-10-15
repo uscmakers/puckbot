@@ -1,0 +1,27 @@
+{
+  "table": {
+    "outer_width_in": 50.0,
+    "outer_length_in": 90.0,
+    "rail_width_in": 3.75,
+    "surface_hsv_lower": [100, 120, 20],
+    "surface_hsv_upper": [130, 255, 255]
+  },
+  "detector": {
+    "white_hsv_lower": [0, 0, 170],
+    "white_hsv_upper": [179, 90, 255],
+    "puck": {
+      "expected_radius_px": 29,
+      "min_area_px": 400,
+      "max_area_px": 3000,
+      "min_roundness": 0.6,
+      "min_fill": 0.85
+    },
+    "mallet": {
+      "expected_radius_px": 45,
+      "min_area_px": 2500,
+      "max_area_px": 8000,
+      "min_roundness": 0.4,
+      "min_fill": 0.5
+    }
+  }
+}
