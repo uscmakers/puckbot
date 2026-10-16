@@ -1,0 +1,17 @@
+{
+  "control_rate_hz": 50,
+  "physics_timestep_s": 0.0005,
+  "paddle": {
+    "max_speed_mps": 3.0,
+    "max_accel_mps2": 20.0,
+    "wall_margin_m": 0.05,
+    "home_position_m": [-0.85, 0.0],
+    "stiffness_n_per_m": 2000.0,
+    "damping_ns_per_m": 40.0,
+    "max_force_n": 50.0
+  },
+  "puck": {
+    "slowdown_ns_per_m": 0.003,
+    "bounce_damping_ratio": 0.1
+  }
+}
