@@ -19,13 +19,13 @@ sim = ["mujoco>=3.2", "imageio-ffmpeg>=0.5"]
 
 [project.scripts]
 puckbot-analyze = "puckbot.vision.cli:main"
-puckbot-sim = "puckbot.sim.cli:main"
+puckbot-sim = "puckbot.rl.sim.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["src/puckbot/vision/tests", "src/puckbot/sim/tests"]
+testpaths = ["src/puckbot/vision/tests", "src/puckbot/rl/sim/tests"]
 
 [tool.setuptools.package-data]
 "puckbot.vision" = ["configs/*.json"]

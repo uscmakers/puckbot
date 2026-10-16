@@ -20,7 +20,7 @@ from pathlib import Path
 import imageio_ffmpeg
 import mujoco
 
-from puckbot.sim.drills import Run
+from puckbot.rl.sim.drills import Run
 
 TABLE_CENTRE = (0.0, 0.0, 0.74)  # middle of the playing surface (metres)
 

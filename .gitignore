@@ -8,5 +8,5 @@ outputs/
 *.mov
 *.MOV
 *.mp4
-!src/puckbot/sim/demo/*.mp4
+!src/puckbot/rl/sim/demo/*.mp4
 *.avi

@@ -16,18 +16,16 @@ from pathlib import Path
 from typing import get_type_hints
 
 DEFAULT_SETTINGS = Path(__file__).resolve().parent / "configs" / "sim.json"
-DEFAULT_TABLE_MODEL = Path(__file__).resolve().parents[3] / "cad" / "table_urdf" / "table.xml"
+DEFAULT_TABLE_MODEL = Path(__file__).resolve().parents[4] / "cad" / "table_urdf" / "table.xml"
 
 
 @dataclass
 class PaddleSettings:
-    max_speed_mps: float  # fastest the gantry can move the paddle
-    max_accel_mps2: float  # hardest it can speed up or brake
+    max_speed_mps: float  # how fast the target point may move: the mallet's top speed
+    max_accel_mps2: float  # how hard the target point may speed up or brake
+    response_time_s: float  # the mallet catches up with its target in about this long (smaller = stiffer)
     wall_margin_m: float  # paddle stays this far from the rails (the real soft limit)
     home_position_m: tuple[float, float]  # where the paddle waits (x, y)
-    stiffness_n_per_m: float  # spring: how hard the paddle is pulled toward its commanded point
-    damping_ns_per_m: float  # damper: how hard it is pulled to the commanded speed
-    max_force_n: float  # the pull is never stronger than this
 
 
 @dataclass
