@@ -1,0 +1,26 @@
+{
+  "camera": {
+    "rate_hz": 120,
+    "latency_s": 0.015,
+    "puck_noise_m": 0.0015,
+    "history_lags_frames": [0, 1, 2, 5, 11]
+  },
+  "game": {
+    "paddles": 1,
+    "pucks": 1,
+    "opponents": []
+  },
+  "goalie": {
+    "episode_seconds": 5.0,
+    "puck_speed_mps": [1.0, 4.0],
+    "bank_shot_fraction": 0.3,
+    "blocked_reward": 1.0,
+    "conceded_reward": -1.0,
+    "approach_reward_per_m": 0.5
+  },
+  "training": {
+    "parallel_envs": 8,
+    "total_steps": 2000000,
+    "seed": 0
+  }
+}

@@ -16,16 +16,19 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7"]
 sim = ["mujoco>=3.2", "imageio-ffmpeg>=0.5"]
+# Install CPU torch first (see rl/train/README.md), or pip pulls a multi-GB CUDA build
+train = ["puckbot[sim]", "gymnasium>=1.0", "stable-baselines3>=2.3", "torch>=2.2"]
 
 [project.scripts]
 puckbot-analyze = "puckbot.vision.cli:main"
 puckbot-sim = "puckbot.rl.sim.cli:main"
+puckbot-train = "puckbot.rl.train.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["src/puckbot/vision/tests", "src/puckbot/rl/sim/tests"]
+testpaths = ["src/puckbot/vision/tests", "src/puckbot/rl/sim/tests", "src/puckbot/rl/train/tests"]
 
 [tool.setuptools.package-data]
 "puckbot.vision" = ["configs/*.json"]
