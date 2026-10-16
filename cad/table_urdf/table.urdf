@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<!--
+  Air-hockey table, puck and paddle for the hockey-bot project.
+  Built 2026-10-15 from Autodesk Fusion designs "Table v7", "Puck v2" and "Paddle v3".
+  See README.md for the frame, names, contact settings and how to load it in MuJoCo / mjlab.
+
+  Frame: Z up, origin on the FLOOR at the centre of the table footprint (x along the long axis).
+  Units: metres, kilograms. Playing surface at z = 0.739775, bumper-rail top at z = 0.793750 (31.25 in).
+  Collision for the table is 15 boxes (MuJoCo convex-hulls mesh colliders, which would fill the tray);
+  the visual is the exact Fusion mesh. Puck and paddle use their exact meshes for visuals and
+  cylinders for collision. Puck and paddle hang off the table on "floating" joints.
+  MuJoCo-specific contact settings (solref, friction, priority) cannot live in URDF; table.xml has them.
+-->
+<robot name="air_hockey_table">
+  <mujoco>
+    <compiler balanceinertia="true" discardvisual="false" strippath="false" fusestatic="true"/>
+  </mujoco>
+
+  <material name="table_grey"><color rgba="0.55 0.55 0.58 1.0"/></material>
+  <material name="puck_black"><color rgba="0.12 0.12 0.12 1.0"/></material>
+  <material name="paddle_white"><color rgba="0.92 0.92 0.90 1.0"/></material>
+
+  <!-- Table: fixed to the world (fusestatic). Mass is from Fusion's "Steel" material; irrelevant while fixed. -->
+  <link name="table">
+    <inertial>
+      <origin xyz="0 0 0.592276" rpy="0 0 0"/>
+      <mass value="802.825"/>
+      <inertia ixx="191.653" iyy="542.491" izz="678.372" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="meshes/table.stl" scale="1 1 1"/></geometry>
+      <material name="table_grey"/>
+    </visual>
+    <collision name="deck_apron">
+      <origin xyz="0 0 0.558937" rpy="0 0 0"/>
+      <geometry><box size="2.1626 1.1474 0.361675"/></geometry>
+    </collision>
+    <collision name="rail_pos_y">
+      <origin xyz="0 0.587 0.761205" rpy="0 0 0"/>
+      <geometry><box size="2.1656 0.096 0.06509"/></geometry>
+    </collision>
+    <collision name="rail_neg_y">
+      <origin xyz="0 -0.587 0.761205" rpy="0 0 0"/>
+      <geometry><box size="2.1656 0.096 0.06509"/></geometry>
+    </collision>
+    <collision name="endrail_pos_x_pos_y">
+      <origin xyz="1.0638 0.3314 0.761205" rpy="0 0 0"/>
+      <geometry><box size="0.038 0.4152 0.06509"/></geometry>
+    </collision>
+    <collision name="endrail_pos_x_neg_y">
+      <origin xyz="1.0638 -0.3314 0.761205" rpy="0 0 0"/>
+      <geometry><box size="0.038 0.4152 0.06509"/></geometry>
+    </collision>
+    <collision name="goal_lintel_pos_x">
+      <origin xyz="1.0638 0 0.775495" rpy="0 0 0"/>
+      <geometry><box size="0.038 0.2476 0.03651"/></geometry>
+    </collision>
+    <collision name="rim_pos_x">
+      <origin xyz="1.1129 0 0.7669" rpy="0 0 0"/>
+      <geometry><box size="0.0602 1.27 0.0156"/></geometry>
+    </collision>
+    <collision name="endrail_neg_x_pos_y">
+      <origin xyz="-1.0638 0.3314 0.761205" rpy="0 0 0"/>
+      <geometry><box size="0.038 0.4152 0.06509"/></geometry>
+    </collision>
+    <collision name="endrail_neg_x_neg_y">
+      <origin xyz="-1.0638 -0.3314 0.761205" rpy="0 0 0"/>
+      <geometry><box size="0.038 0.4152 0.06509"/></geometry>
+    </collision>
+    <collision name="goal_lintel_neg_x">
+      <origin xyz="-1.0638 0 0.775495" rpy="0 0 0"/>
+      <geometry><box size="0.038 0.2476 0.03651"/></geometry>
+    </collision>
+    <collision name="rim_neg_x">
+      <origin xyz="-1.1129 0 0.7669" rpy="0 0 0"/>
+      <geometry><box size="0.0602 1.27 0.0156"/></geometry>
+    </collision>
+    <collision name="leg_pos_x_pos_y">
+      <origin xyz="0.98525 0.4852 0.18905" rpy="0 0 0"/>
+      <geometry><box size="0.0953 0.0794 0.3781"/></geometry>
+    </collision>
+    <collision name="leg_pos_x_neg_y">
+      <origin xyz="0.98525 -0.4852 0.18905" rpy="0 0 0"/>
+      <geometry><box size="0.0953 0.0794 0.3781"/></geometry>
+    </collision>
+    <collision name="leg_neg_x_pos_y">
+      <origin xyz="-0.98525 0.4852 0.18905" rpy="0 0 0"/>
+      <geometry><box size="0.0953 0.0794 0.3781"/></geometry>
+    </collision>
+    <collision name="leg_neg_x_neg_y">
+      <origin xyz="-0.98525 -0.4852 0.18905" rpy="0 0 0"/>
+      <geometry><box size="0.0953 0.0794 0.3781"/></geometry>
+    </collision>
+  </link>
+
+  <!-- Puck v2: 80.8 mm dia x 6.35 mm, ABS, measured from the real puck. Link origin = centre of the bottom face. -->
+  <link name="puck">
+    <inertial>
+      <origin xyz="0 0 0.003175" rpy="0 0 0"/>
+      <mass value="0.034"/>
+      <inertia ixx="1.41874e-05" iyy="1.41874e-05" izz="2.81749e-05" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry><mesh filename="meshes/puck.stl" scale="1 1 1"/></geometry>
+      <material name="puck_black"/>
+    </visual>
+    <collision name="puck_col">
+      <origin xyz="0 0 0.003175" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.04041" length="0.00635"/></geometry>
+    </collision>
+  </link>
+  <joint name="puck_free" type="floating">
+    <parent link="table"/>
+    <child link="puck"/>
+    <origin xyz="0 0 0.739775" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Paddle v3: 100.6 mm base, 45.7 mm grip, 68.6 mm tall, ABS, measured from the real paddle.
+       Link origin = centre of the bottom face; the grip axis is +z. Collision = lip cylinder + grip cylinder.
+       To put it on a robot, replace paddle_free with a fixed joint from the end-effector link. -->
+  <link name="paddle">
+    <inertial>
+      <origin xyz="0 0 0.0222922" rpy="0 0 0"/>
+      <mass value="0.217098"/>
+      <inertia ixx="0.000179454" iyy="0.000179454" izz="0.000210366" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry><mesh filename="meshes/paddle.stl" scale="1 1 1"/></geometry>
+      <material name="paddle_white"/>
+    </visual>
+    <collision name="paddle_base_col">
+      <origin xyz="0 0 0.01143" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.05032" length="0.02286"/></geometry>
+    </collision>
+    <collision name="paddle_grip_col">
+      <origin xyz="0 0 0.04572" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.02286" length="0.04572"/></geometry>
+    </collision>
+  </link>
+  <joint name="paddle_free" type="floating">
+    <parent link="table"/>
+    <child link="paddle"/>
+    <origin xyz="-0.70 0 0.739775" rpy="0 0 0"/>
+  </joint>
+</robot>

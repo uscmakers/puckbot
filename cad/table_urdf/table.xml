@@ -1,0 +1,40 @@
+<mujoco model="air_hockey_table">
+  <option timestep="0.001" />
+  <compiler angle="radian" />
+  <asset>
+    <mesh name="table" content_type="model/stl" file="meshes/table.stl" />
+    <mesh name="puck" content_type="model/stl" file="meshes/puck.stl" />
+    <mesh name="paddle" content_type="model/stl" file="meshes/paddle.stl" />
+  </asset>
+  <worldbody>
+    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.55 0.55 0.58 1" mesh="table" />
+    <geom name="deck_apron" size="1.0813 0.5737 0.180838" pos="0 0 0.558937" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="rail_pos_y" size="1.0828 0.048 0.032545" pos="0 0.587 0.761205" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="rail_neg_y" size="1.0828 0.048 0.032545" pos="0 -0.587 0.761205" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="endrail_pos_x_pos_y" size="0.019 0.2076 0.032545" pos="1.0638 0.3314 0.761205" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="endrail_pos_x_neg_y" size="0.019 0.2076 0.032545" pos="1.0638 -0.3314 0.761205" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="goal_lintel_pos_x" size="0.019 0.1238 0.018255" pos="1.0638 0 0.775495" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="rim_pos_x" size="0.0301 0.635 0.0078" pos="1.1129 0 0.7669" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="endrail_neg_x_pos_y" size="0.019 0.2076 0.032545" pos="-1.0638 0.3314 0.761205" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="endrail_neg_x_neg_y" size="0.019 0.2076 0.032545" pos="-1.0638 -0.3314 0.761205" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="goal_lintel_neg_x" size="0.019 0.1238 0.018255" pos="-1.0638 0 0.775495" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="rim_neg_x" size="0.0301 0.635 0.0078" pos="-1.1129 0 0.7669" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="leg_pos_x_pos_y" size="0.04765 0.0397 0.18905" pos="0.98525 0.4852 0.18905" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="leg_pos_x_neg_y" size="0.04765 0.0397 0.18905" pos="0.98525 -0.4852 0.18905" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="leg_neg_x_pos_y" size="0.04765 0.0397 0.18905" pos="-0.98525 0.4852 0.18905" type="box" rgba="0.55 0.55 0.58 1" />
+    <geom name="leg_neg_x_neg_y" size="0.04765 0.0397 0.18905" pos="-0.98525 -0.4852 0.18905" type="box" rgba="0.55 0.55 0.58 1" />
+    <body name="puck" pos="0 0 0.739775">
+      <inertial pos="0 0 0.003175" quat="0.5 0.5 -0.5 0.5" mass="0.034" diaginertia="2.81749e-05 1.41874e-05 1.41874e-05" />
+      <joint name="puck_free" type="free" />
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.12 0.12 0.12 1" mesh="puck" />
+      <geom name="puck_col" size="0.04041 0.003175" pos="0 0 0.003175" type="cylinder" rgba="0.12 0.12 0.12 1" priority="1" friction="0.02 0.001 0.0001" solref="0.004 1" />
+    </body>
+    <body name="paddle" pos="-0.7 0 0.739775">
+      <inertial pos="0 0 0.0222922" quat="0.5 0.5 -0.5 0.5" mass="0.217098" diaginertia="0.000210366 0.000179454 0.000179454" />
+      <joint name="paddle_free" type="free" />
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.92 0.92 0.9 1" mesh="paddle" />
+      <geom name="paddle_base_col" size="0.05032 0.01143" pos="0 0 0.01143" type="cylinder" rgba="0.92 0.92 0.9 1" priority="1" friction="0.3 0.005 0.0001" solref="0.004 1" />
+      <geom name="paddle_grip_col" size="0.02286 0.02286" pos="0 0 0.04572" type="cylinder" rgba="0.92 0.92 0.9 1" priority="1" friction="0.3 0.005 0.0001" solref="0.004 1" />
+    </body>
+  </worldbody>
+</mujoco>
