@@ -43,13 +43,17 @@ moderate acceleration limit, braking so it stops on the target (`paddle_motion.p
 equivalent for that planning). No gantry or stepper model yet: it behaves like a regular mallet, and
 motor details come later once we measure them. The pucks' slow-down is
 joint damping. A goal is a puck past the slot exit. Paddle 0 is the robot's: it defends -x and attacks +x;
-an opponent paddle is the mirror image, with the same limits. States are arrays: `state.puck_pos` is
+an opponent paddle is the mirror image, with the same limits. Each paddle reaches 3 ft from its own end
+rail (`reach_from_end_m`), the full width minus the wall margin. States are arrays: `state.puck_pos` is
 (pucks, 2), `state.paddle_pos` is (paddles, 2), and `state.touches[paddle, puck]` says who hit what.
 Units are metres, in the CAD frame (origin at the centre).
 
 ### 3. Skills: what should the paddle do?
 Plain rules that look at puck 0 and one paddle and return a target. Nothing is learned. A skill takes
 `paddle=` (which paddle it drives); for the opponent's paddle it mirrors x so the same rules work at either end.
+It ignores other paddles, so it works with one or two. Every skill has the same interface and is batched
+(torch), so this one implementation drives the CPU sim (`skill.target_one(state)`) and mjlab's thousands
+of worlds (`skill.target(snapshot)`); `skill.reset(env_ids)` starts new episodes.
 - `hold`: wait at home
 - `straight_shot`, `bank_shot`: wind up behind the puck, then hit it toward an aim point
 - `goalie`: stand where the puck will cross our defence line, side-rail bounces included
@@ -71,10 +75,11 @@ The shots ignore any goalie, so with an empty goal this measures aim only; with 
 | `layout.py` | How many paddles and pucks, and each paddle's side and reach. |
 | `model.py` | Builds the MuJoCo model from the CAD for a layout. |
 | `env.py` | `reset()`, `step(targets)`, goal and touch detection. |
-| `skills.py` | The skills. |
+| `skills.py` | The scripted skills: one batched interface for the CPU sim and mjlab. |
 | `drills.py` | Runs one skill from a start and records it. |
 | `baselines.py` | Score map of a shot skill over a grid of start spots. |
 | `video.py` | Replays a run into an H.264 mp4 with MuJoCo's renderer. |
+| `showcase.py` | Demo: two skills play a short match as points (serve, shot, block), saved as one mp4. |
 | `cli.py` | The `puckbot-sim` command. |
 | `slurm/render_drills.sbatch` | Renders the demo videos on a GPU node. |
 | `demo/` | The videos above, for reference. |
@@ -107,10 +112,11 @@ add `--goalie` for the scripted goalie at the far goal). Physics values are stil
 
 | Skill | Empty goal | Mean time, puck speed at goal | vs scripted goalie |
 | --- | --- | --- | --- |
-| `straight_shot` | 22 / 28 scored | 0.78 s, 3.3 m/s | 0 / 28 |
-| `bank_shot` | 20 / 28 scored | 0.84 s, 3.0 m/s | 0 / 28 |
+| `straight_shot` | 28 / 28 scored | 0.82 s, 3.2 m/s | 0 / 28 |
+| `bank_shot` | 28 / 28 scored | 0.84 s, 3.1 m/s | 0 / 28 |
 
-- Misses are at the table's side edges and near the centre line (the skills' wind-up room); not diagnosed.
+- The shots keep their wind-up and follow-through inside the paddle's reach, so even pucks at the
+  side rails or near the 3 ft reach limit go in.
 - The goalie blocks every shot: it reads the true puck state with no delay, and the shots are slow.
 - The env runs about 1560 control steps/s on one CPU core (31 simulated seconds per real second).
 
@@ -122,8 +128,8 @@ These are placeholders until we have recordings from the real table.
 - **Rail bounce** is a soft contact tuned by eye. A square-on hit keeps 0.64-0.70 of its speed, a 30 deg
   hit keeps 0.78 (prior teams measured 0.785). `bounce_damping_ratio` below 0.1, or a timestep above
   0.5 ms, makes the contact unstable: the puck gains energy.
-- **Bank shot** assumes the 0.78 (`RAIL_BOUNCE_KEEP` in `skills.py`). It scored from the 5 start
-  positions we tried, but it is not tuned beyond that.
+- **Bank shot** assumes the 0.78 (`RAIL_BOUNCE_KEEP` in `skills.py`). It scores from all 28 grid
+  start spots with an empty goal, but it is not tuned beyond that.
 - **Speed:** about 1650 control steps/s on one core (33 simulated seconds per real second) with one paddle.
 - **Paddle:** the top speed (3 m/s), acceleration limit (40 m/s^2, the middle of the 20-60 m/s^2 range
   misprit7 tested; Hudson's reports give no number), response time (5 ms: it trails its target by about

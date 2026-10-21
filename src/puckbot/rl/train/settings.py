@@ -40,9 +40,11 @@ class GoalieSettings:
 class GameSettings:
     paddles: int  # 1 = just the robot; 2 = the robot and an opponent (the agent always drives paddle 0)
     pucks: int  # how many pucks are on the table
-    opponents: tuple[
-        str, ...
-    ]  # scripted skills (sim/skills.py) the other paddles play; one is drawn per episode
+    opponents: tuple[str, ...]  # scripted skills (sim/skills.py) for the opponent; one per episode
+    episode_seconds: float  # an episode ends after this long if nobody scored
+    scored_reward: float  # puck into the opponent's goal
+    conceded_reward: float  # puck into our goal
+    approach_reward_per_m: float  # shaping: reward for closing the distance between our paddle and the puck
 
 
 @dataclass

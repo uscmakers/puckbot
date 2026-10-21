@@ -6,9 +6,13 @@
     "history_lags_frames": [0, 1, 2, 5, 11]
   },
   "game": {
-    "paddles": 1,
+    "paddles": 2,
     "pucks": 1,
-    "opponents": []
+    "opponents": ["goalie", "straight_shot", "bank_shot"],
+    "episode_seconds": 5.0,
+    "scored_reward": 1.0,
+    "conceded_reward": -1.0,
+    "approach_reward_per_m": 0.5
   },
   "goalie": {
     "episode_seconds": 5.0,

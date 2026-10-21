@@ -81,7 +81,7 @@ class GameEnv(gym.Env):
         targets = np.empty((self.sim.n_paddles, 2))
         targets[0] = action_to_target(action, self.sim)
         for paddle, skill in self.active.items():
-            targets[paddle] = skill.target(self.state)
+            targets[paddle] = skill.target_one(self.state)
 
         self.state = self.sim.step(targets)
         self.camera.record(self._tracked(self.sim.puck_trace, self.sim.paddle_trace))

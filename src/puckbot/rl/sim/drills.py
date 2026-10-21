@@ -103,7 +103,7 @@ def run_skill(
     for _ in range(round(seconds / env.step_seconds)):
         if state.goal:
             break
-        state = env.step(np.array([skill.target(state) for skill in skills]))
+        state = env.step(np.array([skill.target_one(state) for skill in skills]))
         ticks.append((state, env.data.qpos.copy(), env.paddle_target))
 
     states, qpos, targets = zip(*ticks, strict=True)

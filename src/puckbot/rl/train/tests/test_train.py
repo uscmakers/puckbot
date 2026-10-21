@@ -17,7 +17,9 @@ from puckbot.rl.train.tasks import Verdict
 
 @pytest.fixture(scope="module")
 def settings():
-    return load_train_settings()
+    """The CPU goalie task: one paddle, no opponent."""
+    full = load_train_settings()
+    return replace(full, game=replace(full.game, paddles=1, opponents=()))
 
 
 def with_game(settings, **game):

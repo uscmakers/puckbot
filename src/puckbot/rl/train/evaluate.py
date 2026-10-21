@@ -82,7 +82,7 @@ class SkillPolicy:
         self.skill.reset()
 
     def __call__(self, _obs: np.ndarray, env: GameEnv) -> np.ndarray:
-        return target_to_action(self.skill.target(env.state), env.sim)
+        return target_to_action(self.skill.target_one(env.state), env.sim)
 
 
 def skill_policy(name: str) -> SkillPolicy:

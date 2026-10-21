@@ -10,6 +10,7 @@ Steps:
 
 Usage:
     model = build_model(load_settings())                 # one robot paddle, one puck
+    spec = build_spec(load_settings())                   # the same, not compiled (for mjlab)
     model = build_model(load_settings(), Layout.of(2))   # + an opponent paddle
     geometry = TableGeometry.from_model(model)
 """
@@ -92,6 +93,13 @@ class TableGeometry:
 def build_model(
     settings: Settings, layout: Layout | None = None, table_model: str | Path = DEFAULT_TABLE_MODEL
 ) -> mujoco.MjModel:
+    return build_spec(settings, layout, table_model).compile()
+
+
+def build_spec(
+    settings: Settings, layout: Layout | None = None, table_model: str | Path = DEFAULT_TABLE_MODEL
+) -> mujoco.MjSpec:
+    """The model before compiling (mjlab builds its scene from this)."""
     layout = layout or Layout()
     spec = mujoco.MjSpec.from_file(str(table_model))
     # The CAD file's own puck and paddle are the templates: read the table size from them first.
@@ -112,7 +120,7 @@ def build_model(
         _add_paddle(spec, paddle_template, index, setup, low, high, settings)
     spec.delete(puck_template)
     spec.delete(paddle_template)
-    return spec.compile()
+    return spec
 
 
 def _let_things_slide_over_the_deck(spec: mujoco.MjSpec) -> None:
@@ -129,6 +137,7 @@ def _clone_body(spec: mujoco.MjSpec, template, name: str, rename_geom, colour=No
     body.ipos, body.iquat = template.ipos, template.iquat
     for geom in template.geoms:
         copy = body.add_geom(
+            name=rename_geom(geom.name) if geom.name else "",  # named at creation: older MuJoCo needs it
             type=geom.type,
             size=geom.size,
             pos=geom.pos,
@@ -144,9 +153,7 @@ def _clone_body(spec: mujoco.MjSpec, template, name: str, rename_geom, colour=No
             density=geom.density,
             meshname=geom.meshname,
         )
-        if geom.name:
-            copy.name = rename_geom(geom.name)
-        elif colour is not None:  # the unnamed geom is the picture; the named ones are the physics
+        if not geom.name and colour is not None:  # the unnamed geom is the picture; named ones are physics
             copy.rgba = colour
     body.pos[:2] = 0  # so the joint values are table positions
     return body
@@ -162,7 +169,9 @@ def _add_puck(spec: mujoco.MjSpec, template, index: int, settings: Settings) -> 
             damping=settings.puck.slowdown_ns_per_m,
         )
     puck.add_joint(name=f"puck_{index}_yaw", type=mujoco.mjtJoint.mjJNT_HINGE, axis=(0, 0, 1), damping=1e-5)
-    spec.geom(puck_geom(index)).solref = [0.004, settings.puck.bounce_damping_ratio]
+    # by handle, not spec.geom(name): older MuJoCo can't look up names added after a compile
+    collision = next(geom for geom in puck.geoms if geom.name == puck_geom(index))
+    collision.solref = [0.004, settings.puck.bounce_damping_ratio]
 
 
 def _add_paddle(
@@ -222,10 +231,11 @@ def paddle_limits(
     if reach == "full_table":
         return (-wall_x, -wall_y), (wall_x, wall_y)
     if reach == "own_half":
-        centre_line = geometry.paddle_radius  # the paddle stays this far from the centre line
+        # forward: reach_from_end_m from its own end rail, but never closer than a radius to the centre line
+        forward = max(geometry.rail_x - settings.paddle.reach_from_end_m, geometry.paddle_radius)
         if setup.end_sign < 0:
-            return (-wall_x, -wall_y), (-centre_line, wall_y)
-        return (centre_line, -wall_y), (wall_x, wall_y)
+            return (-wall_x, -wall_y), (-forward, wall_y)
+        return (forward, -wall_y), (wall_x, wall_y)
     if isinstance(reach, Box):
         inside = (
             -wall_x <= reach.x_low < reach.x_high <= wall_x

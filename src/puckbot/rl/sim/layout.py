@@ -36,7 +36,7 @@ class Box:
 
 
 Reach = Literal["own_half", "full_table"] | Box
-# own_half    the paddle stays on its own side of the centre line (the real robot's case)
+# own_half    its own side, at most reach_from_end_m (settings, 3 ft) from its own end rail
 # full_table  anywhere on the table, up to the wall margin
 # Box         exactly this rectangle (must fit inside the full-table reach)
 

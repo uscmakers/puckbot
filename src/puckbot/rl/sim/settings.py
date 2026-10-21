@@ -25,6 +25,7 @@ class PaddleSettings:
     max_accel_mps2: float  # how hard the target point may speed up or brake
     response_time_s: float  # the mallet catches up with its target in about this long (smaller = stiffer)
     wall_margin_m: float  # paddle stays this far from the rails (the real soft limit)
+    reach_from_end_m: float  # paddle centre's reach from its own end rail (3 ft); never past centre
     home_position_m: tuple[float, float]  # where the paddle waits (x, y)
 
 

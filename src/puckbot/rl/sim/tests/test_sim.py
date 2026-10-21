@@ -80,16 +80,16 @@ def test_the_paddle_is_a_mass_on_a_critically_damped_mujoco_spring(env):
 def test_target_point_obeys_the_acceleration_and_speed_limits(env):
     caps = env.settings.paddle
     env.reset()
-    env.step((-0.1, 0.4))  # a far diagonal target
+    env.step((-0.2, 0.4))  # a far diagonal target (inside the reach)
     first_step = env.paddle_target[0] - env.home[0]
     assert np.linalg.norm(first_step) == pytest.approx(
         0.5 * caps.max_accel_mps2 * env.step_seconds**2, rel=0.05
     )
-    assert first_step[1] / first_step[0] == pytest.approx((0.4 - 0.0) / (-0.1 - env.home[0, 0]), rel=0.01)
+    assert first_step[1] / first_step[0] == pytest.approx((0.4 - 0.0) / (-0.2 - env.home[0, 0]), rel=0.01)
     speeds = []
     for _ in range(40):
         before = env.paddle_target[0].copy()
-        env.step((-0.1, 0.4))
+        env.step((-0.2, 0.4))
         speeds.append(np.linalg.norm(env.paddle_target[0] - before) / env.step_seconds)
     assert max(speeds) == pytest.approx(caps.max_speed_mps, rel=0.02)
 
@@ -256,7 +256,7 @@ def test_extra_paddles_and_pucks_do_not_change_the_physics(env):
     state = two_pucks.reset(puck_pos=[(-0.40, 0.15), (0.2, -0.45)])
     skill = make_skill("bank_shot", two_pucks)
     for _ in range(len(alone.time) - 1):
-        state = two_pucks.step(skill.target(state))
+        state = two_pucks.step(skill.target_one(state))
     # Not bit-for-bit: MuJoCo solves all contacts together and stops at a tolerance, so a resting puck's
     # contacts nudge the result by ~1e-6, which a bank shot's bounce grows to a few millimetres.
     assert np.allclose(state.puck_pos[0], alone.puck_pos[-1, 0], atol=0.02)
@@ -280,3 +280,35 @@ def test_skills_play_either_end():
     assert run.outcome != "scored"
     assert run.paddle_pos[:, 1, 0].min() > 0  # it stayed on its own side
     assert abs(run.paddle_pos[:, 1, 1]).max() > 0.01  # and moved to meet the puck
+
+
+def test_a_skill_runs_many_worlds_at_once_like_each_alone():
+    """Skills are batched: three worlds in one call give the same targets as three separate calls."""
+    import torch
+
+    from puckbot.rl.sim.skills import Snapshot
+
+    env = AirHockeyEnv(layout=Layout.of(2))
+    starts = [(-0.40, 0.15), (-0.70, -0.27), (-0.25, 0.40)]
+    for name in ("goalie", "straight_shot", "bank_shot"):
+        batched = make_skill(name, env)
+        alone = [make_skill(name, env) for _ in starts]
+        states = [env.reset(puck_pos=start, puck_vel=(-1.0, 0.3)) for start in starts]
+        snaps = [Snapshot.from_state(state) for state in states]
+        together = Snapshot(
+            *(
+                torch.cat([getattr(snap, f) for snap in snaps])
+                for f in ("puck_pos", "puck_vel", "paddle_pos", "paddle_vel")
+            )
+        )
+        expected = np.array([skill.target_one(state) for skill, state in zip(alone, states, strict=True)])
+        assert np.allclose(batched.target(together).numpy(), expected, atol=1e-6), name
+
+
+def test_skills_ignore_a_missing_opponent_paddle():
+    """The same skill works on a one-paddle and a two-paddle table."""
+    for paddles in (1, 2):
+        env = AirHockeyEnv(layout=Layout.of(paddles))
+        state = env.reset(puck_pos=(-0.4, 0.1))
+        for name in ("goalie", "straight_shot", "bank_shot", "hold"):
+            assert make_skill(name, env).target_one(state).shape == (2,)

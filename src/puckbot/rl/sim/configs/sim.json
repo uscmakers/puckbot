@@ -6,6 +6,7 @@
     "max_accel_mps2": 40.0,
     "response_time_s": 0.005,
     "wall_margin_m": 0.05,
+    "reach_from_end_m": 0.9144,
     "home_position_m": [-0.85, 0.0]
   },
   "puck": {
